@@ -10,6 +10,8 @@ class ContactController extends Controller
     public function store()
     {
         $contact = request()->user()->contacts()->create($this->validateData());
+
+        return $contact;
     }
 
     private function validateData()
