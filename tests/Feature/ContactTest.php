@@ -4,9 +4,12 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\{Contact, User};
+use Symfony\Component\HttpFoundation\Response;
 
 class ContactTest extends TestCase
 {
+    protected $user;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -26,9 +29,39 @@ class ContactTest extends TestCase
         $this->assertCount(0, Contact::all());
     }
 
-    public function an_authenticated_user_can_add_a_contact()
+    public function test_an_authenticated_user_can_add_a_contact()
     {
-        
+        $response = $this->post('/api/contacts', $this->data());
+
+        $contact = Contact::first();
+
+        $this->assertEquals('Test Name', $contact->name);
+        $this->assertEquals('test@email.com', $contact->email);
+        $this->assertEquals('05/14/1988', $contact->birthday->format('m/d/Y'));
+        $this->assertEquals('ABC String', $contact->company);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $response->assertJson([
+            'data' => [
+                'contact_id' => $contact->id,
+            ],
+            'links' => [
+                'self' => $contact->path(),
+            ]
+        ]);
+    }
+
+    public function test_fields_are_required()
+    {
+        collect(['name', 'email', 'birthday', 'company'])->each(function ($field) {
+            $response = $this->post('/api/contacts',
+                    array_merge($this->data(), [$field => '']));
+
+            $response->assertSessionHasErrors($field);
+
+            $this->assertCount(0, Contact::all());
+        });
     }
 
     private function data()

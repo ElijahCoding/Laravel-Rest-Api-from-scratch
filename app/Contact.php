@@ -11,6 +11,11 @@ class Contact extends Model
 
     protected $dates = ['birthday'];
 
+    public function path()
+    {
+        return '/contacts/' . $this->id;
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
