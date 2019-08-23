@@ -78,8 +78,7 @@ class ContactTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
-        $response = $this->post('/api/contacts',
-            array_merge($this->data()));
+        $response = $this->post('/api/contacts', $this->data());
 
         $this->assertCount(1, Contact::all());
         $this->assertInstanceOf(Carbon::class, Contact::first()->birthday);
